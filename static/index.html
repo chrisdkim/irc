@@ -80,10 +80,10 @@ if(showhide == "show"){
           $scope.text = '';
         };
         
-         $scope.search = function search() {
-          console.log('Searching keyword:', $scope.search);
-          socket.emit('search', $scope.search);
-          $scope.search = '';
+        $scope.search = function search() {
+          console.log('Searching keyword:', $scope.searchterm);
+          socket.emit('search', $scope.searchterm);
+          //$scope.search = '';
         };
 
         $scope.setName = function setName() {
@@ -178,10 +178,9 @@ if(showhide == "show"){
               </div>
             </form>
             <form ng-submit="search()">
-              <div class="span2" ><input type="text" class="input-block-level" ng-model="name" readonly="readonly" placeholder="Your Name"></div>
-              <div class="input-append span7">
-                <input type="text" class="span6" ng-model="search" placeholder="Keyword">
-                <input type="submit" class="span1 btn btn-primary" value="Search" ng-disabled="!search">
+              <div class="input-append span9">
+                <input type="text" class="span6" ng-model="searchterm" placeholder="Please Enter Search">
+                <input type="submit" class="span2 btn btn-primary" value="Search" ng-disabled="!searchterm">
               </div>
             </form>
           </div>

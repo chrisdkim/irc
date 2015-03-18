@@ -79,15 +79,19 @@ def new_message(message):
 @socketio.on('search', namespace='/chat')
 def on_search(search):
     print 'SEARCH'
-    search = 'search'
+    print "Attempting to search for %s" % search
+
     conn = connectToIRC();
     conn.autocommit = True;
-    cur = conn.cursor();
-    search_string = "select * from messages where message like %s"
-    cur.execute(search_string, (search))
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    query = "select u.id, u.username, m.message from messages m, users u where u.id::varchar(255) = m.username and m.message like '%" + search + "%'"
+    cur.execute(query)
     results = cur.fetchall()
-    for result in results:
-        emit('search')
+    print "found %d search results" % len(results)
+    for message in results:
+        print message
+        msg = {'text':message['message'], 'name':message['username']}
+        emit('message', msg)
     updateRoster()
     
 @socketio.on('identify', namespace='/chat')

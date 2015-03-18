@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" ng-app>
   <head>
-    <title>Chat Example</title>
+    <title>IRC Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
@@ -45,6 +45,7 @@ if(showhide == "show"){
         $scope.roster = [];
         $scope.name = '';
         $scope.text = '';
+        $scope.search = '';
 
         socket.on('connect', function () {
           console.log('connected');
@@ -62,41 +63,51 @@ if(showhide == "show"){
           $scope.roster = names;
           $scope.$apply();
         });
+        
+        socket.on('identify', function(name) {
+          console.log("Identified user as " + name);
+          $scope.name = name;
+        })
+        
+        socket.on('search', function(search) {
+          console.log("Search keyword " + search);
+          $scope.search = search;
+        })
 
         $scope.send = function send() {
           console.log('Sending message:', $scope.text);
           socket.emit('message', $scope.text);
           $scope.text = '';
         };
+        
+         $scope.search = function search() {
+          console.log('Searching keyword:', $scope.search);
+          socket.emit('search', $scope.search);
+          $scope.search = '';
+        };
 
         $scope.setName = function setName() {
           socket.emit('identify', $scope.name);
         };
-        $scope.setName2 = function setName2() {
+        // $scope.setName2 = function setName2() {
           
-          socket.emit('identify', $scope.name2);
-          $scope.name = $scope.name2;
-          $scope.$apply();
-        };
+        //   socket.emit('identify', $scope.name2);
+        //   $scope.name = $scope.name2;
+        //   $scope.$apply();
+        // };
 
         $scope.processLogin = function processLogin() {
           console.log("Trying to log in");
           login('hide');
-          socket.emit('login', $scope.password);
+          socket.emit('login', {'username':$scope.name, 'password': $scope.password});
         };
-
-
 
       }
     </script>
   </head>
-  <body onload="javascript:login('show')">
+  <body onload="javascript:login('hide')">
     
 
-    
-    
-    
-    
     
     <div class="container" ng-controller="ChatController">
       
@@ -104,7 +115,8 @@ if(showhide == "show"){
           <div id="popupbox"> 
 <form ng-submit="processLogin()">
 <center>Username:</center>
-<center><input type="text"  ng-model="name2" ng-change="setName2()" placeholder="Username" size="14" /></center>
+<!--<center><input type="text"  ng-model="name" ng-change="setName()" placeholder="Username" size="14" /></center>-->
+<center><input type="text" ng-model="name" placeholder="Username" size="14" /></center>
 <center>Password:</center>
 <center><input  ng-model="password" type="password" size="14" /></center>
 <center><input type="submit" class="span1 btn btn-primary" value="Send" ng-disabled="!password"></center>
@@ -130,10 +142,11 @@ if(showhide == "show"){
         </div>
       </div>
       <div class="page-header">
-        <h1>Chat Example</h1>
+        <h1>IRC Chat</h1>
       </div>
       <div class="row">
         <div class="span3">
+          <button class="btn" onclick="login('show');">Sign In</button>
           <ul class="nav nav-list well">
             <li class="nav-header">Local Users</li>
             <li ng-repeat="user in roster" ng-bind="user">
@@ -162,6 +175,13 @@ if(showhide == "show"){
               <div class="input-append span7">
                 <input type="text" class="span6" ng-model="text" placeholder="Message">
                 <input type="submit" class="span1 btn btn-primary" value="Send" ng-disabled="!text">
+              </div>
+            </form>
+            <form ng-submit="search()">
+              <div class="span2" ><input type="text" class="input-block-level" ng-model="name" readonly="readonly" placeholder="Your Name"></div>
+              <div class="input-append span7">
+                <input type="text" class="span6" ng-model="search" placeholder="Keyword">
+                <input type="submit" class="span1 btn btn-primary" value="Search" ng-disabled="!search">
               </div>
             </form>
           </div>
